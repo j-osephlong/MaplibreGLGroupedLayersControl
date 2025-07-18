@@ -1,0 +1,50 @@
+/**
+ * Written by Joseph Long, 2024
+ *
+ */
+.maplibregl-ctrl-layers-ctrl {
+  position: relative !important;
+  display: flex;
+  align-items: start;
+  flex-direction: row;
+  pointer-events: auto;
+  background-color: white;
+}
+.maplibregl-ctrl-layers-ctrl button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #333;
+  height: unset !important;
+  width: unset !important;
+  padding: 0.8em !important;
+}
+.maplibregl-ctrl-layers-ctrl .popup hr {
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+}
+.maplibregl-ctrl-layers-ctrl .popup .layers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.5rem;
+}
+.maplibregl-ctrl-layers-ctrl .popup .layers-list .layer .input-container {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: start;
+  font-size: 0.9rem;
+}
+.maplibregl-ctrl-layers-ctrl.closed button {
+  display: flex;
+}
+.maplibregl-ctrl-layers-ctrl.closed button.pin {
+  display: none;
+}
+.maplibregl-ctrl-layers-ctrl.closed .popup {
+  display: none;
+}
+
+/*# sourceMappingURL=LayersControl.css.map */

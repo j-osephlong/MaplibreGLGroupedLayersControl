@@ -1,0 +1,66 @@
+/**
+ * Written by Joseph Long, 2024
+ *
+ */
+
+.maplibregl-ctrl-layers-ctrl {
+    position: relative !important;
+
+    display: flex;
+    align-items: start;
+    flex-direction: row;
+    pointer-events: auto;
+
+    background-color: white;
+
+
+    button {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #333;
+        height: unset !important;
+        width: unset !important;
+        padding: .8em !important;
+
+    }
+
+    .popup {
+        hr {
+            margin-left: .5rem;
+            margin-right: .5rem;
+        }
+
+        .layers-list {
+            display: flex;
+            flex-direction: column;
+            gap: .25rem;
+            padding: .5rem;
+
+            .layer {
+                .input-container {
+                    display: flex;
+                    gap: .5rem;
+                    align-items: center;
+                    justify-content: start;
+                    font-size: .9rem;
+                }
+            }
+        }
+    }
+
+    &.closed {
+        button {
+            display: flex;
+        }
+
+        button.pin {
+            display: none;
+        }
+
+        .popup {
+            display: none;
+        }
+    }
+}
