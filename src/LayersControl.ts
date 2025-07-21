@@ -33,6 +33,7 @@ export class LayersControl extends maplibregl.Evented
 	/** Maplibre object */
 	_map: maplibregl.Map | null = null
 
+	/** Sets up base UI */
 	constructor() {
 		super()
 		this.groups = new Map()
@@ -79,21 +80,24 @@ export class LayersControl extends maplibregl.Evented
 		this._container.append(button, popup)
 	}
 
+	/** IControl API. */
 	onAdd(map: maplibregl.Map): HTMLElement {
 		this._map = map
 		this._map.on("styledata", () => {
 			this.updateList(this._map!.style)
 		})
-
+		
 		return this._container
 	}
-
+	
+	/** IControl API. */
 	onRemove(): void {
 		this._map = null
 		this.groups.clear()
 		this._container.parentNode?.removeChild(this._container)
 	}
 
+	/** Adds html for a group to the list. */
 	_createLayerListItemHTML(groupName: string, inputType: "checkbox" | "radio", inputCallback: (event: HTMLElementEventMap["click"]) => void): HTMLElement {
 		const groupSpec = this.groups.get(groupName)!
 		const visible
@@ -126,6 +130,10 @@ export class LayersControl extends maplibregl.Evented
 		return layerContainer
 	}
 
+	/** Updates the list.
+	 * 
+	 * Called every map style update.
+	 */
 	updateList(style: maplibregl.Style) {
 		this._basemapsGroupList.innerHTML = ""
 		this._layerGroupsList.innerHTML = ""
@@ -156,23 +164,23 @@ export class LayersControl extends maplibregl.Evented
 		}
 	}
 
-	/** Add layer to control */
+	/** Add group to control */
 	_addGroupHtml(groupName: string) {
 		if (!this._map) {
 			throw new Error(
 				"Cannot register a layer before adding control to a map.",
 			)
 		}
-
+		
 		const groupSpec = this.groups.get(groupName)
-
+		
 		if (!groupSpec)
 			throw new Error(`Non-existent group ${groupName}.`)
-
+		
 		const layerElm = this._createLayerListItemHTML(groupName, "checkbox", (event) => {
 			const target = event.target as HTMLInputElement
 			const groupName = target.id
-
+			
 			// Toggle visibility of each associated layer and control state
 			if (target.checked) {
 				this.showGroup(groupName)
@@ -180,19 +188,20 @@ export class LayersControl extends maplibregl.Evented
 			else {
 				this.hideGroup(groupName)
 			}
-
+			
 			this.fire("toggle", { groupName, visible: target.checked })
 		})
-
+		
 		this._layerGroupsList.append(layerElm)
-
+		
 		// Initialize its state in control
 		this.groups.set(groupName, {
 			...groupSpec,
 			html: layerElm,
 		})
 	}
-
+	
+	/** Adds a basemap-type group to control */
 	_addBasemapHtml(groupName: string) {
 		if (!this._map) {
 			throw new Error(
@@ -315,9 +324,11 @@ export class LayersControl extends maplibregl.Evented
 		return null
 	}
 
+	/** Adds a layer to a group. Creates group if one with the passed name does not exist. */
 	addLayerToGroup(options: {
 		layerId: string
 		groupName: string
+		/** If true, the group is considered a basemap, and uses a radio instead of a checkbox. */
 		basemap?: boolean
 	}) {
 		// Create group if it doesn't exist
