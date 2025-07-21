@@ -69,3 +69,7 @@ layersControl.addLayerToGroup({
 ```
 
 You of course could put multiple basemaps in a group, if you have one layer that you wanted to be semi-transparent for example.
+
+## Usage Terms
+
+This software is made available in the hope that it will be useful, but without any warranty. No author or distributor accepts responsibility to anyone for the consequences of using it or for whether it serves any particular purpose or works at all. 
