@@ -1,5 +1,6 @@
 /**
  * Written by Joseph Long, 2024
+ * 	Updated 2026.
  * 'maplibre-gl-basemaps' used as a starting template at start of development.
  *      https://github.com/ka7eh/maplibre-gl-basemaps
  *
@@ -13,16 +14,17 @@ export interface LayerGroupSpec {
 	groupName: string
 	basemap: boolean
 	html?: HTMLElement
+	order?: number,
 }
 
 export class LayersControl extends maplibregl.Evented
 	implements maplibregl.IControl {
 	/** Container element */
-	_container: HTMLElement
+	_container!: HTMLElement
 	/** Basemap list element */
-	_basemapsGroupList: HTMLDivElement
+	_basemapsGroupList!: HTMLDivElement
 	/** Layers list element */
-	_layerGroupsList: HTMLDivElement
+	_layerGroupsList!: HTMLDivElement
 
 	/**
 	 * Registry of active layers/layer groups
@@ -37,7 +39,40 @@ export class LayersControl extends maplibregl.Evented
 	constructor() {
 		super()
 		this.groups = new Map()
+	}
 
+	/** IControl API. */
+	onAdd(map: maplibregl.Map): HTMLElement {
+		this._map = map
+		this._initHTML()
+		this._map.on("styledata", () => {
+			this.updateList()
+		})
+		return this._container
+	}
+
+	/** IControl API. */
+	onRemove(): void {
+		this._map = null
+		this.groups.clear()
+		this._container.parentNode?.removeChild(this._container)
+	}
+
+	/** Updates the list.
+	 * 
+	 * Called every map style update.
+	 */
+	updateList() {
+		// reset lists
+		this._basemapsGroupList.innerHTML = ""
+		this._layerGroupsList.innerHTML = ""
+		const sortedGroups = [...this.groups.values()].toSorted((a, b) => (a.order ?? 0) > (b.order ?? 0) ? 1 : -1)
+		for (const groupSpec of sortedGroups) {
+			this._addGroupHtml(groupSpec)
+		}
+	}
+
+	_initHTML() {
 		// Build HTML elements
 		this._container = document.createElement("div")
 		this._container.classList.add(
@@ -68,10 +103,10 @@ export class LayersControl extends maplibregl.Evented
 		button.append(buttonIcon)
 
 		this._basemapsGroupList = document.createElement("div")
-		this._basemapsGroupList.classList.add("layers-list")
+		this._basemapsGroupList.classList.add("groups-list")
 
 		this._layerGroupsList = document.createElement("div")
-		this._layerGroupsList.classList.add("layers-list")
+		this._layerGroupsList.classList.add("groups-list")
 
 		const popup = document.createElement("div")
 		popup.classList.add("popup")
@@ -80,198 +115,89 @@ export class LayersControl extends maplibregl.Evented
 		this._container.append(button, popup)
 	}
 
-	/** IControl API. */
-	onAdd(map: maplibregl.Map): HTMLElement {
-		this._map = map
-		this._map.on("styledata", () => {
-			this.updateList(this._map!.style)
-		})
-		
-		return this._container
-	}
-	
-	/** IControl API. */
-	onRemove(): void {
-		this._map = null
-		this.groups.clear()
-		this._container.parentNode?.removeChild(this._container)
-	}
-
-	/** Adds html for a group to the list. */
-	_createLayerListItemHTML(groupName: string, inputType: "checkbox" | "radio", inputCallback: (event: HTMLElementEventMap["click"]) => void): HTMLElement {
-		const groupSpec = this.groups.get(groupName)!
-		const visible
-			= this._map!.getLayoutProperty(groupSpec.layerIds[0], "visibility") != "none"
-		//  Create html for layer
-		const layerContainer = document.createElement("div")
-		layerContainer.classList.add("layer")
-
-		const inputContainer = document.createElement("div")
-		inputContainer.classList.add("input-container")
-
+	_createListItemHTML(text: string, checked: boolean, inputType: "checkbox" | "radio", inputCallback: (event: MouseEvent) => void) {
+		// html for checkbox and label
+		const listItem = document.createElement("div")
+		listItem.classList.add("list-item")
+		// checkbox
 		const input = document.createElement("input")
 		input.type = inputType
-		input.id = groupName
-		input.checked = visible
+		input.id = text
+		input.checked = checked
 		input.addEventListener("click", inputCallback)
+		// label
 		const label = document.createElement("label")
-		label.innerText = groupName
-
-		inputContainer.append(input, label)
-
-		const opacityInput = document.createElement("input")
-		opacityInput.type = "range"
-		opacityInput.min = "0"
-		opacityInput.max = "1"
-		opacityInput.value = "1"
-
-		layerContainer.append(inputContainer)
-
-		return layerContainer
-	}
-
-	/** Updates the list.
-	 * 
-	 * Called every map style update.
-	 */
-	updateList(style: maplibregl.Style) {
-		this._basemapsGroupList.innerHTML = ""
-		this._layerGroupsList.innerHTML = ""
-
-		const baseMapGroups: string[] = []
-		const layerGroups: string[] = []
-
-		for (const [id] of Object.entries(style._layers)) {
-			const groupName = this.getGroupNameFromLayerID(id)
-			if (!groupName)
-				continue
-			const groupSpec = this.groups.get(groupName)
-			if (!groupSpec)
-				continue
-
-			if (groupSpec.basemap) {
-				if (baseMapGroups.includes(groupName))
-					continue
-				this._addBasemapHtml(groupSpec.groupName)
-				baseMapGroups.push(groupName)
-			}
-			else {
-				if (layerGroups.includes(groupName))
-					continue
-				this._addGroupHtml(groupSpec.groupName)
-				layerGroups.push(groupName)
-			}
-		}
+		label.innerText = text
+		listItem.append(input, label)
+		return listItem
 	}
 
 	/** Add group to control */
-	_addGroupHtml(groupName: string) {
+	_addGroupHtml(groupSpec: LayerGroupSpec) {
 		if (!this._map) {
 			throw new Error(
 				"Cannot register a layer before adding control to a map.",
 			)
 		}
-		
-		const groupSpec = this.groups.get(groupName)
-		
-		if (!groupSpec)
-			throw new Error(`Non-existent group ${groupName}.`)
-		
-		const layerElm = this._createLayerListItemHTML(groupName, "checkbox", (event) => {
-			const target = event.target as HTMLInputElement
-			const groupName = target.id
-			
-			// Toggle visibility of each associated layer and control state
-			if (target.checked) {
-				this.showGroup(groupName)
-			}
-			else {
-				this.hideGroup(groupName)
-			}
-			
-			this.fire("toggle", { groupName, visible: target.checked })
-		})
-		
-		this._layerGroupsList.append(layerElm)
-		
-		// Initialize its state in control
+		const groupName = groupSpec.groupName
+		const visible = groupSpec.layerIds.some(id => this._map!.getLayoutProperty(id, "visibility") != "none")
+		//  Create html for layer
+		const groupDetailsElm = document.createElement("div")
+		groupDetailsElm.classList.add("layer-group")
+		// create list item with visibility toggle event
+		const listItem = this._createListItemHTML(groupName, visible, groupSpec.basemap ? "radio" : "checkbox", (event) => groupSpec.basemap ? this._onBasemapSelect(event, groupSpec) : this._onGroupToggle(event, groupSpec))
+		groupDetailsElm.appendChild(listItem)
+		// for (const layerId of groupSpec.layerIds) {
+		// 	const layerVisible = this._map!.getLayoutProperty(layerId, "visibility") != "none"
+		// 	groupDetailsElm.append(this._createListItemHTML(layerId, layerVisible, "checkbox", (event) => this._onLayerToggle(event, layerId)))
+		// }
+		// add to correct container
+		if (groupSpec.basemap) {
+			this._basemapsGroupList.append(groupDetailsElm)
+		} else {
+			this._layerGroupsList.append(groupDetailsElm)
+		}
+		// set the html on the spec
 		this.groups.set(groupName, {
 			...groupSpec,
-			html: layerElm,
+			html: groupDetailsElm,
 		})
 	}
-	
-	/** Adds a basemap-type group to control */
-	_addBasemapHtml(groupName: string) {
-		if (!this._map) {
-			throw new Error(
-				"Cannot register a layer before adding control to a map.",
-			)
+
+	_onLayerToggle(event: MouseEvent, layerId: string) {
+		event.stopImmediatePropagation()
+		const target = event.target as HTMLInputElement
+		this.setLayerVisible(layerId, target.checked)
+	}
+
+	_onGroupToggle(event: MouseEvent, groupSpec: LayerGroupSpec) {
+		event.stopImmediatePropagation()
+		const target = event.target as HTMLInputElement
+		this.setGroupVisible(groupSpec.groupName, target.checked)
+	}
+
+	_onBasemapSelect(event: MouseEvent, groupSpec: LayerGroupSpec) {
+		event.stopPropagation()
+		if (!this._map)
+			throw new Error("Missing map instance.")
+		// Set the basemap as visible
+		this.setGroupVisible(groupSpec.groupName, true)
+		for (const otherGroupSpec of this.groups.values()) {
+			// skip non basemaps
+			if (!otherGroupSpec.basemap)
+				continue
+			// skip this basemap
+			if (otherGroupSpec.groupName == groupSpec.groupName)
+				continue
+			const otherGroupVisible = this._someGroupLayerVisible(otherGroupSpec)
+			if (otherGroupVisible) {
+				this.setGroupVisible(otherGroupSpec.groupName, false)
+			}
 		}
+	}
 
-		const groupSpec = this.groups.get(groupName)
-
-		if (!groupSpec)
-			throw new Error(`Non-existent group ${groupName}.`)
-
-		const layerElm = this._createLayerListItemHTML(groupName, "radio", (event) => {
-			if (!this._map)
-				throw new Error("Missing map instance.")
-
-			const groupSpec = this.groups.get(groupName)
-
-			if (!groupSpec) {
-				console.error(`Non-existent group ${groupName}.`)
-				return
-			}
-
-			const target = event.target as HTMLInputElement
-			const basemapID = target.id
-
-			console.debug("CALLBACk", this.groups)
-
-			// Toggle visibility of each associated layer and control state
-			this._map.setLayoutProperty(
-				groupSpec.layerIds[0],
-				"visibility",
-				"visible",
-			)
-			for (const [name2, state2] of this.groups.entries()) {
-				if (!state2.basemap)
-					continue
-				if (name2 == basemapID)
-					continue
-				const groupSpec2 = this.groups.get(name2)
-
-				if (!groupSpec2) {
-					console.error(`Non-existent group ${name2}.`)
-					return
-				}
-
-				const group2Visible = groupSpec2.layerIds.some(id => this._map?.getLayoutProperty(id, "visibility") == "visible")
-
-				if (group2Visible) {
-					this._map.setLayoutProperty(
-						groupSpec2.layerIds[0],
-						"visibility",
-						"none",
-					)
-
-					state2.html!.getElementsByTagName("input")!.item(0)!.checked = false
-					this.fire("toggle", { groupName: name2, visible: false })
-				}
-			}
-
-			this.fire("toggle", { groupName, visible: true })
-		})
-
-		this._basemapsGroupList.appendChild(layerElm)
-
-		// Initialize it's state in control
-		this.groups.set(groupName, {
-			...groupSpec,
-			html: layerElm,
-		})
+	_someGroupLayerVisible(groupSpec: LayerGroupSpec) {
+		return groupSpec.layerIds.some(id => this._map?.getLayoutProperty(id, "visibility") != "none")
 	}
 
 	/** Remove layer from control */
@@ -293,8 +219,8 @@ export class LayersControl extends maplibregl.Evented
 			console.error(`No such layer collection with id ${groupName}.`)
 			return
 		}
-
 		// refresh each unique source in group
+		// get the sources that this group uses
 		const sources = new Set<string>()
 		for (const id of registryEntry.layerIds) {
 			const srcId = this._map?.getLayer(id)?.source
@@ -302,29 +228,46 @@ export class LayersControl extends maplibregl.Evented
 				sources.add(srcId)
 			}
 		}
-
+		// try to refresh each source
 		for (const sourceId of sources.values()) {
 			try {
 				this._map?.refreshTiles(sourceId)
 			}
 			catch (e) {
+				// some layers cannot be refreshed, as they're not tiles based
 				console.error("Failed to refresh", groupName, e)
 			}
 		}
 	}
 
-	/** Get the groupID that a layer corrosponds to. */
-	getGroupNameFromLayerID(layerId: string) {
-		for (const [registryID, spec] of this.groups.entries()) {
-			const match = spec.layerIds.some(id => id == layerId)
-			if (match) {
-				return registryID
-			}
+	/** Add a layer to a group. */
+	addLayer(layerId: string, groupName: string) {
+		if (!this.groups.has(groupName)) {
+			this.addGroup({ groupName })
 		}
-		return null
+		this.groups.get(groupName)?.layerIds.push(layerId)
+		this.updateList()
 	}
 
-	/** Adds a layer to a group. Creates group if one with the passed name does not exist. */
+	/**Define a group. */
+	addGroup(options: {
+		groupName: string,
+		order?: number,
+		basemap?: boolean,
+	}) {
+		this.groups.set(options.groupName, {
+			groupName: options.groupName,
+			layerIds: [],
+			basemap: !!options.basemap,
+			order: options.order ?? this.groups.size,
+		})
+		this.updateList()
+	}
+
+	/** Adds a layer to a group. Creates group if one with the passed name does not exist.
+	 * 
+	 * @deprecated Use addLayer and addGroup instead.
+	 */
 	addLayerToGroup(options: {
 		layerId: string
 		groupName: string
@@ -340,6 +283,7 @@ export class LayersControl extends maplibregl.Evented
 			})
 		}
 		else {
+			// otherwise add it to the existing group
 			this.groups.get(options.groupName)?.layerIds.push(options.layerId)
 		}
 	}
@@ -361,11 +305,16 @@ export class LayersControl extends maplibregl.Evented
 			return
 		}
 		for (const layerId of registryEntry.layerIds) {
-			this._map?.setLayoutProperty(
-				layerId,
-				"visibility",
-				visible ? "visible" : "none",
-			)
+			this.setLayerVisible(layerId, visible)
 		}
+		this.fire("toggle", { groupName, visible })
+	}
+
+	setLayerVisible(layerId: string, visible: boolean) {
+		this._map?.setLayoutProperty(
+			layerId,
+			"visibility",
+			visible ? "visible" : "none",
+		)
 	}
 }

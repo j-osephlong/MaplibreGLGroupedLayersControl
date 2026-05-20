@@ -20,22 +20,25 @@
   width: unset !important;
   padding: 0.8em !important;
 }
-.maplibregl-ctrl-layers-ctrl .popup hr {
-  margin-left: 0.5rem;
-  margin-right: 0.5rem;
-}
-.maplibregl-ctrl-layers-ctrl .popup .layers-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  padding: 0.5rem;
-}
-.maplibregl-ctrl-layers-ctrl .popup .layers-list .layer .input-container {
+.maplibregl-ctrl-layers-ctrl .list-item {
   display: flex;
   gap: 0.5rem;
   align-items: center;
   justify-content: start;
   font-size: 0.9rem;
+}
+.maplibregl-ctrl-layers-ctrl .popup hr {
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+}
+.maplibregl-ctrl-layers-ctrl .popup .groups-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.5rem;
+}
+.maplibregl-ctrl-layers-ctrl .popup .groups-list .layer-group summary ::marker {
+  display: none;
 }
 .maplibregl-ctrl-layers-ctrl.closed button {
   display: flex;

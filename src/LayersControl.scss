@@ -26,25 +26,30 @@
 
     }
 
+    // holds a checkbox and label. Used by groups and group-layers
+    .list-item {
+        display: flex;
+        gap: .5rem;
+        align-items: center;
+        justify-content: start;
+        font-size: .9rem;
+    }
+
     .popup {
         hr {
             margin-left: .5rem;
             margin-right: .5rem;
         }
 
-        .layers-list {
+        .groups-list {
             display: flex;
             flex-direction: column;
             gap: .25rem;
             padding: .5rem;
 
-            .layer {
-                .input-container {
-                    display: flex;
-                    gap: .5rem;
-                    align-items: center;
-                    justify-content: start;
-                    font-size: .9rem;
+            .layer-group summary {
+                ::marker {
+                    display: none;
                 }
             }
         }

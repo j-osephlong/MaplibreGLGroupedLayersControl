@@ -1,5 +1,6 @@
 /**
  * Written by Joseph Long, 2024
+ * 	Updated 2026.
  * 'maplibre-gl-basemaps' used as a starting template at start of development.
  *      https://github.com/ka7eh/maplibre-gl-basemaps
  *
@@ -11,6 +12,7 @@ export interface LayerGroupSpec {
     groupName: string;
     basemap: boolean;
     html?: HTMLElement;
+    order?: number;
 }
 export declare class LayersControl extends maplibregl.Evented implements maplibregl.IControl {
     /** Container element */
@@ -33,24 +35,35 @@ export declare class LayersControl extends maplibregl.Evented implements maplibr
     onAdd(map: maplibregl.Map): HTMLElement;
     /** IControl API. */
     onRemove(): void;
-    /** Adds html for a group to the list. */
-    _createLayerListItemHTML(groupName: string, inputType: "checkbox" | "radio", inputCallback: (event: HTMLElementEventMap["click"]) => void): HTMLElement;
     /** Updates the list.
      *
      * Called every map style update.
      */
-    updateList(style: maplibregl.Style): void;
+    updateList(): void;
+    _initHTML(): void;
+    _createListItemHTML(text: string, checked: boolean, inputType: "checkbox" | "radio", inputCallback: (event: MouseEvent) => void): HTMLDivElement;
     /** Add group to control */
-    _addGroupHtml(groupName: string): void;
-    /** Adds a basemap-type group to control */
-    _addBasemapHtml(groupName: string): void;
+    _addGroupHtml(groupSpec: LayerGroupSpec): void;
+    _onLayerToggle(event: MouseEvent, layerId: string): void;
+    _onGroupToggle(event: MouseEvent, groupSpec: LayerGroupSpec): void;
+    _onBasemapSelect(event: MouseEvent, groupSpec: LayerGroupSpec): void;
+    _someGroupLayerVisible(groupSpec: LayerGroupSpec): boolean;
     /** Remove layer from control */
     removeGroup(id: string): void;
     /** Refresh group to reflect changes in sources. */
     refreshGroup(groupName: string): void;
-    /** Get the groupID that a layer corrosponds to. */
-    getGroupNameFromLayerID(layerId: string): string | null;
-    /** Adds a layer to a group. Creates group if one with the passed name does not exist. */
+    /** Add a layer to a group. */
+    addLayer(layerId: string, groupName: string): void;
+    /**Define a group. */
+    addGroup(options: {
+        groupName: string;
+        order?: number;
+        basemap?: boolean;
+    }): void;
+    /** Adds a layer to a group. Creates group if one with the passed name does not exist.
+     *
+     * @deprecated Use addLayer and addGroup instead.
+     */
     addLayerToGroup(options: {
         layerId: string;
         groupName: string;
@@ -62,5 +75,6 @@ export declare class LayersControl extends maplibregl.Evented implements maplibr
     /** Hide the layers in a spec. */
     hideGroup(groupName: string): void;
     setGroupVisible(groupName: string, visible: boolean): void;
+    setLayerVisible(layerId: string, visible: boolean): void;
 }
 //# sourceMappingURL=LayersControl.d.ts.map
