@@ -6,7 +6,8 @@
  *
  */
 
-import * as maplibregl from "maplibre-gl"
+import type { IControl, Map as MaplibreGLMap } from "maplibre-gl"
+import { Evented } from "maplibre-gl"
 
 /** Spec for LayerGroup */
 export interface LayerGroupSpec {
@@ -17,8 +18,8 @@ export interface LayerGroupSpec {
 	order?: number,
 }
 
-export class LayersControl extends maplibregl.Evented
-	implements maplibregl.IControl {
+export class LayersControl extends Evented
+	implements IControl {
 	/** Container element */
 	_container!: HTMLElement
 	/** Basemap list element */
@@ -33,7 +34,7 @@ export class LayersControl extends maplibregl.Evented
 	 */
 	groups: Map<string, LayerGroupSpec>
 	/** Maplibre object */
-	_map: maplibregl.Map | null = null
+	_map: MaplibreGLMap | null = null
 
 	/** Sets up base UI */
 	constructor() {
@@ -42,7 +43,7 @@ export class LayersControl extends maplibregl.Evented
 	}
 
 	/** IControl API. */
-	onAdd(map: maplibregl.Map): HTMLElement {
+	onAdd(map: MaplibreGLMap): HTMLElement {
 		this._map = map
 		this._initHTML()
 		this._map.on("styledata", () => {
@@ -147,10 +148,6 @@ export class LayersControl extends maplibregl.Evented
 		// create list item with visibility toggle event
 		const listItem = this._createListItemHTML(groupName, visible, groupSpec.basemap ? "radio" : "checkbox", (event) => groupSpec.basemap ? this._onBasemapSelect(event, groupSpec) : this._onGroupToggle(event, groupSpec))
 		groupDetailsElm.appendChild(listItem)
-		// for (const layerId of groupSpec.layerIds) {
-		// 	const layerVisible = this._map!.getLayoutProperty(layerId, "visibility") != "none"
-		// 	groupDetailsElm.append(this._createListItemHTML(layerId, layerVisible, "checkbox", (event) => this._onLayerToggle(event, layerId)))
-		// }
 		// add to correct container
 		if (groupSpec.basemap) {
 			this._basemapsGroupList.append(groupDetailsElm)

@@ -5,7 +5,8 @@
  *      https://github.com/ka7eh/maplibre-gl-basemaps
  *
  */
-import * as maplibregl from "maplibre-gl";
+import type { IControl, Map as MaplibreGLMap } from "maplibre-gl";
+import { Evented } from "maplibre-gl";
 /** Spec for LayerGroup */
 export interface LayerGroupSpec {
     layerIds: string[];
@@ -14,7 +15,7 @@ export interface LayerGroupSpec {
     html?: HTMLElement;
     order?: number;
 }
-export declare class LayersControl extends maplibregl.Evented implements maplibregl.IControl {
+export declare class LayersControl extends Evented implements IControl {
     /** Container element */
     _container: HTMLElement;
     /** Basemap list element */
@@ -28,11 +29,11 @@ export declare class LayersControl extends maplibregl.Evented implements maplibr
      */
     groups: Map<string, LayerGroupSpec>;
     /** Maplibre object */
-    _map: maplibregl.Map | null;
+    _map: MaplibreGLMap | null;
     /** Sets up base UI */
     constructor();
     /** IControl API. */
-    onAdd(map: maplibregl.Map): HTMLElement;
+    onAdd(map: MaplibreGLMap): HTMLElement;
     /** IControl API. */
     onRemove(): void;
     /** Updates the list.

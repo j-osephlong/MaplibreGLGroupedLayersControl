@@ -18,12 +18,13 @@
   "type": "module",
   "devDependencies": {
     "del-cli": "^6.0.0",
+    "maplibre-gl": "^6.0.0",
     "oxlint": "^1.7.0",
     "sass": "^1.89.2",
-    "semantic-release": "^24.2.7",
+    "semantic-release": "^25.0.9",
     "typescript": "^5.8.3"
   },
-  "dependencies": {
-    "maplibre-gl": "^5.6.1"
+  "peerDependencies": {
+    "maplibre-gl": "^6.0.0"
   }
 }
