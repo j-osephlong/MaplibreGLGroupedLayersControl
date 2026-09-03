@@ -1,3 +1,9 @@
+## 1.1.0 (2026-09-03)
+
+### Feat
+
+- Support maplibre-gl 6
+
 ## 1.0.3 (2026-05-20)
 
 ### Refactor
