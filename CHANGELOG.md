@@ -1,3 +1,9 @@
+## 1.1.1 (2026-09-23)
+
+### Fix
+
+- Changed event listeners for opening/closing control to work better on mobile
+
 ## 1.1.0 (2026-09-03)
 
 ### Feat
