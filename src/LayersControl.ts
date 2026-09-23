@@ -82,7 +82,7 @@ export class LayersControl extends Evented
 		)
 		this._container.classList.add("maplibregl-ctrl-layers-ctrl")
 
-		const openControl = () => this._container.classList.remove("visible")
+		const openControl = () => this._container.classList.add("visible")
 		const closeControl = () => this._container.classList.remove("visible")
 		this._container.addEventListener("mouseenter", openControl)
 		this._container.addEventListener("click", openControl)
