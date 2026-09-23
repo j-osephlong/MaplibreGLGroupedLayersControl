@@ -55,7 +55,7 @@
         }
     }
 
-    &.closed {
+    &:not(.visible) {
         button {
             display: flex;
         }

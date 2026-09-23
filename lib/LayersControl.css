@@ -40,13 +40,13 @@
 .maplibregl-ctrl-layers-ctrl .popup .groups-list .layer-group summary ::marker {
   display: none;
 }
-.maplibregl-ctrl-layers-ctrl.closed button {
+.maplibregl-ctrl-layers-ctrl:not(.visible) button {
   display: flex;
 }
-.maplibregl-ctrl-layers-ctrl.closed button.pin {
+.maplibregl-ctrl-layers-ctrl:not(.visible) button.pin {
   display: none;
 }
-.maplibregl-ctrl-layers-ctrl.closed .popup {
+.maplibregl-ctrl-layers-ctrl:not(.visible) .popup {
   display: none;
 }
 

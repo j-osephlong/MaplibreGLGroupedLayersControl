@@ -81,14 +81,14 @@ export class LayersControl extends Evented
 			"maplibregl-ctrl-group",
 		)
 		this._container.classList.add("maplibregl-ctrl-layers-ctrl")
-		this._container.classList.add("closed")
 
-		this._container.addEventListener("mouseenter", () => {
-			this._container.classList.remove("closed")
-		})
-		this._container.addEventListener("mouseleave", () => {
-			this._container.classList.add("closed")
-		})
+		const openControl = () => this._container.classList.remove("visible")
+		const closeControl = () => this._container.classList.remove("visible")
+		this._container.addEventListener("mouseenter", openControl)
+		this._container.addEventListener("click", openControl)
+		// events for mobile
+		this._container.addEventListener("mouseleave", closeControl)
+		this._map?.on("click", closeControl) // clicking on map (outside of control) should close the control
 
 		const button = document.createElement("button")
 		button.type = "button"
