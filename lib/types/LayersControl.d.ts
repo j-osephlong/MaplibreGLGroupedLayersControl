@@ -30,8 +30,18 @@ export declare class LayersControl extends Evented implements IControl {
     groups: Map<string, LayerGroupSpec>;
     /** Maplibre object */
     _map: MaplibreGLMap | null;
+    appendHTML?: HTMLElement;
+    private _updateTimeout;
     /** Sets up base UI */
-    constructor();
+    constructor(options?: {
+        /** Optional HTML element to append to bottom of the control when expanded.
+         *
+         * @remarks
+         * The motivating factor for adding this was to allow for a way to inject Vue content into the control while keeping domain concerns seperate.
+         * By adding this, one can use Vue's <Teleport /> element to replace the contents of the appended html.
+         */
+        appendHTML?: HTMLElement;
+    });
     /** IControl API. */
     onAdd(map: MaplibreGLMap): HTMLElement;
     /** IControl API. */

@@ -1,3 +1,13 @@
+## 1.2.0 (2026-10-21)
+
+### Feat
+
+- Added appendHTML option to control, allowing developers to inject custom HTML into the bottom of the control.
+
+### Perf
+
+- Debounce styledata event.
+
 ## 1.1.2 (2026-09-23)
 
 ### Fix
