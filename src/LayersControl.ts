@@ -18,6 +18,16 @@ export interface LayerGroupSpec {
 	order?: number,
 }
 
+export interface LayersControlOptions {
+	/** Optional HTML element to append to bottom of the control when expanded.
+	 * 
+	 * @remarks
+	 * The motivating factor for adding this was to allow for a way to inject Vue content into the control while keeping domain concerns seperate.
+	 * By adding this, one can use Vue's <Teleport /> element to replace the contents of the appended html.
+	 */
+	appendHTML?: HTMLElement
+}
+
 export class LayersControl extends Evented
 	implements IControl {
 	/** Container element */
@@ -41,15 +51,7 @@ export class LayersControl extends Evented
 	private _updateTimeout: ReturnType<typeof setTimeout> | null = null;
 
 	/** Sets up base UI */
-	constructor(options?: {
-		/** Optional HTML element to append to bottom of the control when expanded.
-		 * 
-		 * @remarks
-		 * The motivating factor for adding this was to allow for a way to inject Vue content into the control while keeping domain concerns seperate.
-		 * By adding this, one can use Vue's <Teleport /> element to replace the contents of the appended html.
-		 */
-		appendHTML?: HTMLElement
-	}) {
+	constructor(options?: LayersControlOptions) {
 		super()
 		this.appendHTML = options?.appendHTML
 		this.groups = new Map()
