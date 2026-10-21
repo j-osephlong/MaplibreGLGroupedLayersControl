@@ -1,3 +1,9 @@
+## 1.2.2 (2026-10-21)
+
+### Fix
+
+- Expose options interface from index.ts
+
 ## 1.2.1 (2026-10-21)
 
 ### Refactor
