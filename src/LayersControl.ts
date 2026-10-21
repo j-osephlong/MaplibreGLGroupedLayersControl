@@ -36,6 +36,8 @@ export class LayersControl extends Evented
 	/** Maplibre object */
 	_map: MaplibreGLMap | null = null
 
+	private _updateTimeout: ReturnType<typeof setTimeout> | null = null;
+
 	/** Sets up base UI */
 	constructor() {
 		super()
@@ -47,7 +49,10 @@ export class LayersControl extends Evented
 		this._map = map
 		this._initHTML()
 		this._map.on("styledata", () => {
-			this.updateList()
+			if (this._updateTimeout) clearTimeout(this._updateTimeout);
+			this._updateTimeout = setTimeout(() => {
+				this.updateList();
+			}, 150); // 150ms batches the initial rapid-fire layer additions
 		})
 		return this._container
 	}
@@ -64,6 +69,7 @@ export class LayersControl extends Evented
 	 * Called every map style update.
 	 */
 	updateList() {
+		console.count("update list")
 		// reset lists
 		this._basemapsGroupList.innerHTML = ""
 		this._layerGroupsList.innerHTML = ""
