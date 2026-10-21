@@ -1,3 +1,9 @@
+## 1.2.1 (2026-10-21)
+
+### Refactor
+
+- Added options interface
+
 ## 1.2.0 (2026-10-21)
 
 ### Feat
